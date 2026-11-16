@@ -1,0 +1,54 @@
+# Environment files, credentials and local configuration
+.env
+.env.*
+!.env.example
+ponte.json
+android/keystore.properties
+*.jks
+*.keystore
+*.pem
+*.key
+
+# Local data, logs, exports and generated state
+dados/
+dados_ponte/
+celular/dados/
+_trabalho/
+*.log
+*.err
+*.db
+*.sqlite
+*.sqlite3
+*.zip
+*.csv
+
+# Local machine and editor settings
+android/local.properties
+.idea/
+*.iml
+.vscode/
+__pycache__/
+*.py[cod]
+
+# Build outputs and distributable binaries
+.gradle/
+build/
+android/.gradle/
+android/build/
+android/app/build/
+android/app/schemas/
+android/dist/
+*.apk
+*.aab
+
+# Internal notes, audit reports and machine-specific setup guides
+AUDITORIA-*.md
+CODEX-*.md
+CONTINUAR-*.md
+regras-memoria.md
+android/docs/BUILD.md
+android/README.md
+celular/LEIA-ME-CELULAR.md
+android/docs/
+*.cmd
+*.ps1

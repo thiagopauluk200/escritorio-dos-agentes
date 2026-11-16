@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SOMENTE no build de teste (debug): permite http:// para a Central na rede local (endereço legado do J7).
+     O app avisa na tela quando a conexão está sem criptografia. O build de distribuição não inclui isto. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

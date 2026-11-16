@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escritório dos agentes</title>
+<style>
+  :root{
+    --fundo:#0e1320; --painel:#151c2e; --painel2:#1a2338; --linha:#263150;
+    --texto:#e7ecf7; --suave:#93a0bd; --fraco:#5d6a88;
+    --codex:#3ddc97; --claude:#f08a5d; --chatgpt:#b79cff; --vault:#6cb6ff;
+    --ok:#3ddc97; --ruim:#ff6b6b; --piso:#1b2440;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--fundo);color:var(--texto);
+    font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;overflow:hidden}
+  header{height:54px;display:flex;align-items:center;gap:14px;padding:0 18px;
+    border-bottom:1px solid var(--linha);background:linear-gradient(180deg,#141b2d,#10162500)}
+  header h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
+  header h1 span{color:var(--suave);font-weight:400}
+  .pilulas{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .pilula{display:flex;align-items:center;gap:7px;padding:4px 11px;border-radius:99px;
+    background:var(--painel);border:1px solid var(--linha);font-size:12.5px;color:var(--suave);white-space:nowrap}
+  .pilula b{color:var(--texto);font-weight:600}
+  .ponto{width:8px;height:8px;border-radius:50%;background:var(--fraco);flex:none}
+  .ponto.on{background:var(--ok);box-shadow:0 0 0 0 #3ddc9788;animation:pulso 2s infinite}
+  .ponto.off{background:var(--ruim)}
+  @keyframes pulso{70%{box-shadow:0 0 0 7px #3ddc9700}100%{box-shadow:0 0 0 0 #3ddc9700}}
+
+  main{height:calc(100% - 54px);display:grid;grid-template-columns:minmax(520px,1.25fr) minmax(380px,1fr);gap:14px;padding:14px}
+  .coluna{display:flex;flex-direction:column;gap:14px;min-height:0}
+  .predio{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding-right:2px}
+  .sala{flex:none;background:var(--painel);border:1px solid var(--linha);border-radius:14px;position:relative;overflow:hidden}
+  .sala::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:linear-gradient(var(--piso) 1px,transparent 1px),linear-gradient(90deg,var(--piso) 1px,transparent 1px);
+    background-size:34px 34px;mask-image:linear-gradient(180deg,transparent 0,#000 55%)}
+  .placa{display:flex;align-items:center;gap:10px;padding:11px 14px 0;position:relative}
+  .placa .cor{width:10px;height:10px;border-radius:3px;background:var(--c)}
+  .placa h2{margin:0;font-size:13px;font-weight:650;letter-spacing:.6px;text-transform:uppercase}
+  .placa small{color:var(--suave);font-size:12px}
+  .placa .cont{margin-left:auto;color:var(--suave);font-size:12px}
+  .mesas{display:flex;flex-wrap:wrap;gap:6px 10px;padding:4px 12px 12px;position:relative;min-height:150px;align-items:flex-end}
+  .mesa{width:156px;text-align:center;position:relative}
+  .balao{min-height:38px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:-4px}
+  .balao span{display:inline-block;max-width:150px;background:#fff;color:#1b2333;font-size:11.5px;font-weight:600;
+    padding:4px 9px;border-radius:10px;position:relative;line-height:1.25;box-shadow:0 2px 8px #0006}
+  .balao span::after{content:"";position:absolute;left:50%;bottom:-5px;width:9px;height:9px;background:#fff;transform:translateX(-50%) rotate(45deg)}
+  .balao span i{display:block;font-style:normal;font-weight:400;color:#5b667e;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:132px}
+  .balao.mem span{background:var(--vault);color:#06213d}
+  .balao.mem span::after{background:var(--vault)}
+  .balao.mem span i{color:#0b3a66}
+  .mesa svg{width:116px;height:98px;display:block;margin:0 auto}
+  .mesa .titulo{font-size:12px;font-weight:600;line-height:1.25;margin-top:1px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .mesa .ha{font-size:11px;color:var(--fraco)}
+  .mesa.dormindo .titulo{color:var(--suave)}
+  .vazio{color:var(--suave);font-size:12.5px;padding:0 6px 10px;align-self:center;max-width:330px;text-align:left}
+  .vazio b{color:var(--texto)}
+
+  /* bonequinho */
+  .braco{transform-box:fill-box;transform-origin:50% 10%}
+  .trabalhando .braco.e{animation:digita .34s infinite alternate}
+  .trabalhando .braco.d{animation:digita .34s .17s infinite alternate}
+  @keyframes digita{to{transform:translateY(-3px) rotate(-7deg)}}
+  .trabalhando .cabeca{animation:balanca 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes balanca{50%{transform:rotate(3deg) translateY(.6px)}}
+  .dormindo .cabeca{transform-box:fill-box;transform-origin:50% 100%;transform:rotate(16deg) translate(3px,5px)}
+  .ocioso .cabeca{animation:olha 7s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes olha{0%,60%,100%{transform:rotate(0)}70%,85%{transform:rotate(-7deg)}}
+  .tela-linha{opacity:0}
+  .trabalhando .tela-linha{animation:codigo 1.6s steps(1) infinite}
+  .trabalhando .tela-linha:nth-child(2){animation-delay:.4s}
+  .trabalhando .tela-linha:nth-child(3){animation-delay:.8s}
+  .trabalhando .tela-linha:nth-child(4){animation-delay:1.2s}
+  @keyframes codigo{0%{opacity:0}25%,100%{opacity:1}}
+  .zzz{opacity:0}
+  .dormindo .zzz{animation:zzz 2.8s ease-in infinite}
+  .dormindo .zzz.b{animation-delay:.9s}.dormindo .zzz.c{animation-delay:1.8s}
+  @keyframes zzz{0%{opacity:0;transform:translate(0,0)}25%{opacity:1}100%{opacity:0;transform:translate(9px,-18px)}}
+  .vapor{animation:vapor 2.6s ease-in-out infinite}
+  @keyframes vapor{0%{opacity:0;transform:translateY(0)}40%{opacity:.6}100%{opacity:0;transform:translateY(-7px)}}
+  .gaveta{animation:gaveta 3.5s ease-in-out infinite}
+  @keyframes gaveta{0%,55%,100%{transform:translateX(0)}70%,88%{transform:translateX(5px)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+  .feed{height:170px;flex:none;background:var(--painel);border:1px solid var(--linha);border-radius:14px;display:flex;flex-direction:column;min-height:0}
+  .feed h3,.rede h3{margin:0;padding:10px 14px 6px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--suave);font-weight:650}
+  .feed ul{list-style:none;margin:0;padding:0 14px 10px;overflow:auto;flex:1}
+  .feed li{display:flex;gap:9px;align-items:baseline;padding:3px 0;font-size:12.5px;border-top:1px dashed #222c47}
+  .feed li:first-child{border-top:0}
+  .feed time{color:var(--fraco);font-variant-numeric:tabular-nums;flex:none;width:44px}
+  .feed .quem{font-weight:650;flex:none}
+  .feed .oque{color:var(--texto);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .feed .onde{color:var(--fraco);margin-left:auto;flex:none;max-width:32%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .rede{background:radial-gradient(120% 90% at 50% 40%,#18223c 0,#101627 70%);border:1px solid var(--linha);border-radius:14px;
+    display:flex;flex-direction:column;min-height:0;position:relative;transition:box-shadow .4s,border-color .4s}
+  .rede.acesa{border-color:var(--vault);box-shadow:0 0 0 1px var(--vault),0 0 34px #6cb6ff33}
+  .rede .topo{display:flex;align-items:baseline;gap:10px;padding-right:14px}
+  .rede .topo span{margin-left:auto;color:var(--suave);font-size:12px}
+  .rede canvas{flex:1;min-height:0;width:100%;display:block;cursor:crosshair}
+  .legenda{display:flex;flex-wrap:wrap;gap:4px 12px;padding:8px 14px 11px;font-size:11.5px;color:var(--suave);border-top:1px solid #1f2944}
+  .legenda i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+  .dica{position:absolute;pointer-events:none;background:#fff;color:#1b2333;font-size:12px;font-weight:600;padding:4px 9px;border-radius:8px;
+    box-shadow:0 3px 12px #0008;white-space:nowrap;display:none;z-index:3}
+  .dica small{display:block;font-weight:400;color:#5b667e}
+  .aviso{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:var(--ruim);color:#2b0606;padding:7px 14px;border-radius:9px;font-weight:600;display:none;z-index:9}
+  @media (max-width:980px){body{overflow:auto}main{grid-template-columns:1fr;height:auto}.rede{height:520px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Escritório dos agentes <span id="nome-vault"></span></h1>
+  <div class="pilulas">
+    <div class="pilula"><span class="ponto" id="p-mcp"></span>MCP do Obsidian <b id="t-mcp">…</b></div>
+    <div class="pilula"><span class="ponto" style="background:var(--codex)"></span>Codex <b id="t-codex">–</b></div>
+    <div class="pilula"><span class="ponto" style="background:var(--claude)"></span>Claude Code <b id="t-claude">–</b></div>
+    <div class="pilula"><span class="ponto" style="background:var(--vault)"></span>Notas <b id="t-notas">–</b></div>
+  </div>
+</header>
+<div class="aviso" id="aviso">Sem resposta do servidor local — abra de novo o “1 - Abrir Escritório”.</div>
+<main>
+  <div class="coluna">
+    <div class="predio">
+      <section class="sala" style="--c:var(--codex)">
+        <div class="placa"><span class="cor"></span><h2>Sala Codex</h2><small>OpenAI</small><span class="cont" id="c-codex"></span></div>
+        <div class="mesas" id="m-codex"></div>
+      </section>
+      <section class="sala" style="--c:var(--claude)">
+        <div class="placa"><span class="cor"></span><h2>Sala Claude Code</h2><small>Anthropic</small><span class="cont" id="c-claude"></span></div>
+        <div class="mesas" id="m-claude"></div>
+      </section>
+      <section class="sala" style="--c:var(--chatgpt)">
+        <div class="placa"><span class="cor"></span><h2>Arquivo ChatGPT</h2><small>conversas importadas</small><span class="cont" id="c-chatgpt"></span></div>
+        <div class="mesas" id="m-chatgpt"></div>
+      </section>
+    </div>
+    <div class="feed"><h3>Movimento do escritório</h3><ul id="feed"></ul></div>
+  </div>
+  <div class="rede" id="rede">
+    <div class="topo"><h3>Rede de conhecimento · Obsidian</h3><span id="t-rede"></span></div>
+    <canvas id="tela"></canvas>
+    <div class="legenda" id="legenda"></div>
+    <div class="dica" id="dica"></div>
+  </div>
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const CORES = {codex:"#3ddc97", claude:"#f08a5d", chatgpt:"#b79cff", vault:"#6cb6ff"};
+const PALETA = ["#ffd166","#6cb6ff","#ef8fb3","#7be0d6","#c3e36b","#ffa94d","#a5b4fc","#9aa7c2"];
+const PELES = ["#f6d3b3","#e9b98f","#c98f62","#8d5a3b","#fbe0c8"];
+const CABELOS = ["#2b2118","#5b3a1e","#c98a2b","#1c1c28","#8a8f9c","#a23e2a"];
+
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function ha(ms, agora){
+  const s=Math.max(0,(agora-ms)/1000);
+  if(s<45) return "agora";
+  if(s<3600) return "há "+Math.round(s/60)+" min";
+  if(s<86400) return "há "+Math.round(s/3600)+" h";
+  return "há "+Math.round(s/86400)+" d";
+}
+function hora(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+
+/* ------------------------------------------------------------ bonequinho */
+function boneco(semente, cor, status){
+  const h=hash(semente), pele=PELES[h%PELES.length], cabelo=CABELOS[(h>>4)%CABELOS.length], estilo=(h>>8)%3;
+  const ligado = status==="trabalhando";
+  const olhos = status==="dormindo"
+    ? `<path d="M58 35h5M68 35h5" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/>`
+    : `<circle cx="60.5" cy="35" r="1.7" fill="#2a1f1a"/><circle cx="70.5" cy="35" r="1.7" fill="#2a1f1a"/>`;
+  const penteado = estilo===0 ? `<path d="M52 33c0-9 6-14 14-14s14 5 14 14c-3-5-8-7-14-7s-11 2-14 7z" fill="${cabelo}"/>`
+    : estilo===1 ? `<path d="M52 34c-1-10 5-16 14-16s15 6 14 16c-2-6-4-8-7-9-5 3-13 3-17 1-2 2-3 4-4 8z" fill="${cabelo}"/>`
+    : `<path d="M51 36c-2-11 5-18 15-18s17 7 15 18l-3 8c1-9-1-14-4-16-5 2-12 2-17 0-3 3-4 8-3 16z" fill="${cabelo}"/>`;
+  return `<svg viewBox="0 0 132 112" class="${status}" aria-hidden="true">
+    <ellipse cx="66" cy="104" rx="50" ry="6" fill="#000" opacity=".28"/>
+    <rect x="46" y="44" width="40" height="46" rx="9" fill="#232d49"/>
+    <rect x="50" y="52" width="32" height="34" rx="10" fill="${cor}"/>
+    <g class="cabeca">
+      <circle cx="66" cy="34" r="14" fill="${pele}"/>
+      ${penteado}${olhos}
+      ${status==="dormindo" ? "" : `<path d="M62.5 41q3.5 2.6 7 0" stroke="#3a2a22" stroke-width="1.4" fill="none" stroke-linecap="round"/>`}
+    </g>
+    <rect class="braco e" x="44" y="58" width="9" height="22" rx="4.5" fill="${cor}"/>
+    <rect class="braco d" x="79" y="58" width="9" height="22" rx="4.5" fill="${cor}"/>
+    <rect x="10" y="78" width="112" height="9" rx="3" fill="#7a5a3c"/>
+    <rect x="14" y="87" width="6" height="17" fill="#5e442c"/><rect x="112" y="87" width="6" height="17" fill="#5e442c"/>
+    <rect x="46" y="55" width="40" height="25" rx="3" fill="#0b0f1a" stroke="#39456a" stroke-width="1.5"/>
+    <rect x="48.5" y="57.5" width="35" height="20" rx="1.5" fill="${ligado ? "#11253a" : "#141a29"}"/>
+    <g fill="${cor}">
+      <rect class="tela-linha" x="51" y="60" width="18" height="2" rx="1"/>
+      <rect class="tela-linha" x="51" y="64.5" width="26" height="2" rx="1"/>
+      <rect class="tela-linha" x="51" y="69" width="13" height="2" rx="1"/>
+      <rect class="tela-linha" x="51" y="73.5" width="22" height="2" rx="1"/>
+    </g>
+    <rect x="62" y="80" width="8" height="3" fill="#39456a"/>
+    <rect x="100" y="69" width="10" height="9" rx="2" fill="#e9edf5"/><path d="M110 71q4 2 0 5" stroke="#e9edf5" stroke-width="1.6" fill="none"/>
+    ${status==="dormindo" ? "" : `<path class="vapor" d="M105 66q-2-3 0-5" stroke="#cfd7ea" stroke-width="1.3" fill="none" stroke-linecap="round"/>`}
+    <g fill="#cfd7ea" font-family="Segoe UI,sans-serif" font-weight="700">
+      <text class="zzz" x="86" y="26" font-size="9">z</text><text class="zzz b" x="90" y="20" font-size="11">z</text><text class="zzz c" x="95" y="13" font-size="13">Z</text>
+    </g>
+  </svg>`;
+}
+function arquivista(cor, tem){
+  return `<svg viewBox="0 0 132 112" class="${tem ? "ocioso" : "dormindo"}" aria-hidden="true">
+    <ellipse cx="66" cy="104" rx="50" ry="6" fill="#000" opacity=".28"/>
+    <rect x="76" y="34" width="40" height="70" rx="4" fill="#2a3352" stroke="#3d4a72" stroke-width="1.5"/>
+    <g class="${tem ? "gaveta" : ""}"><rect x="80" y="40" width="32" height="17" rx="2" fill="#39456a"/><rect x="91" y="46" width="10" height="3" rx="1.5" fill="${cor}"/></g>
+    <rect x="80" y="61" width="32" height="17" rx="2" fill="#39456a"/><rect x="91" y="67" width="10" height="3" rx="1.5" fill="#8793b3"/>
+    <rect x="80" y="82" width="32" height="17" rx="2" fill="#39456a"/><rect x="91" y="88" width="10" height="3" rx="1.5" fill="#8793b3"/>
+    <rect x="30" y="56" width="30" height="40" rx="10" fill="${cor}"/>
+    <rect x="33" y="92" width="9" height="12" rx="3" fill="#232d49"/><rect x="48" y="92" width="9" height="12" rx="3" fill="#232d49"/>
+    <g class="cabeca"><circle cx="45" cy="40" r="14" fill="#f6d3b3"/>
+      <path d="M31 39c0-9 6-14 14-14s14 5 14 14c-3-5-8-7-14-7s-11 2-14 7z" fill="#8a8f9c"/>
+      <circle cx="40" cy="41" r="4" fill="none" stroke="#2a1f1a" stroke-width="1.3"/><circle cx="50" cy="41" r="4" fill="none" stroke="#2a1f1a" stroke-width="1.3"/><path d="M44 41h2" stroke="#2a1f1a" stroke-width="1.3"/>
+    </g>
+    <rect class="braco d" x="56" y="62" width="20" height="8" rx="4" fill="${cor}"/>
+    <rect x="66" y="56" width="13" height="16" rx="1.5" fill="#fff"/><path d="M68.5 60h8M68.5 63.5h8M68.5 67h5" stroke="#9aa7c2" stroke-width="1.1"/>
+  </svg>`;
+}
+
+/* ------------------------------------------------------------------ salas */
+const assinaturas = {};
+function sala(chave, dados, agora){
+  const alvo=$("m-"+chave), ss=dados.sessoes, ativos=ss.filter(s=>s.status==="trabalhando").length;
+  $("c-"+chave).textContent = ss.length ? (ativos ? ativos+" trabalhando · " : "") + ss.length+" nas últimas 24 h" : "";
+  $("t-"+chave).textContent = !dados.instalado ? "não encontrado" : ativos ? ativos+" trabalhando" : ss.length ? "ocioso" : "sem sessões";
+  const assin = JSON.stringify([dados.instalado, ss.map(s=>[s.id,s.status,s.atividade,s.detalhe,s.memoria,s.titulo])]);
+  if(assinaturas[chave]!==assin){
+    assinaturas[chave]=assin;
+    if(!ss.length){
+      const msg = dados.instalado
+        ? `<b>Ninguém por aqui nas últimas 24 h.</b><br>Quando uma sessão começar neste computador, o agente aparece nesta mesa.`
+        : chave==="claude"
+          ? `<b>Claude Code ainda não tem sessões locais.</b><br>Rode o “2 - Conectar Claude Code” e abra o <code>claude</code> no terminal — ele aparece aqui.`
+          : `<b>Pasta do Codex não encontrada.</b>`;
+      alvo.innerHTML = `<div class="mesa dormindo"><div class="balao"></div>${boneco(chave,"#3a456a","dormindo")}</div><div class="vazio">${msg}</div>`;
+    } else {
+      alvo.innerHTML = ss.map(s=>{
+        const fala = s.memoria ? ["consultando a memória", s.atividade==="consultando a memória" ? s.detalhe : ""] : s.status==="trabalhando" ? [s.atividade||"trabalhando", s.detalhe] : s.status==="ocioso" ? ["aguardando você",""] : null;
+        const balao = fala ? `<span>${esc(fala[0])}${fala[1] ? `<i>${esc(fala[1])}</i>` : ""}</span>` : "";
+        return `<div class="mesa ${s.status}" title="${esc(s.pedido||s.titulo)}">
+          <div class="balao ${s.memoria?"mem":""}">${balao}</div>
+          ${boneco(s.id, CORES[chave], s.status)}
+          <div class="titulo">${esc(s.titulo)}</div><div class="ha" data-ts="${s.atualizado}"></div></div>`;
+      }).join("");
+    }
+  }
+  alvo.querySelectorAll("[data-ts]").forEach(e=>e.textContent=ha(+e.dataset.ts, agora));
+}
+function salaChatGPT(c, agora){
+  const assin=JSON.stringify(c);
+  $("c-chatgpt").textContent = c.conversas ? c.conversas+" conversas no vault" : "";
+  if(assinaturas.chatgpt===assin) return; assinaturas.chatgpt=assin;
+  $("m-chatgpt").innerHTML = `<div class="mesa ${c.conversas?"ocioso":"dormindo"}">
+      <div class="balao">${c.conversas ? `<span>${c.conversas} conversas arquivadas</span>` : ""}</div>${arquivista(CORES.chatgpt, c.conversas>0)}
+      <div class="titulo">Arquivista</div><div class="ha">${c.ultimo_import ? "última importação "+ha(c.ultimo_import, agora) : "sem importação"}</div></div>
+    <div class="vazio">${c.conversas
+      ? `As conversas ficam em <b>05-Fontes/ChatGPT</b> e entram na rede ao lado. Para atualizar, exporte de novo e rode o “3 - Importar ChatGPT”.`
+      : `<b>Nenhuma conversa importada ainda.</b><br>No ChatGPT: Configurações → Controles de dados → Exportar dados. Quando o ZIP chegar por e-mail, arraste-o sobre o “3 - Importar ChatGPT”.`}</div>`;
+}
+function feed(itens){
+  $("feed").innerHTML = itens.length ? itens.map(e=>`<li><time>${hora(e.t)}</time>
+    <span class="quem" style="color:${CORES[e.tipo]||"#fff"}">${esc(e.agente)}</span>
+    <span class="oque">${esc(e.texto)}</span><span class="onde">${esc(e.sessao)}</span></li>`).join("")
+    : `<li><span class="oque" style="color:var(--suave)">Sem movimento nas últimas 24 h.</span></li>`;
+}
+
+/* ------------------------------------------------------------------ grafo */
+const tela=$("tela"), ctx=tela.getContext("2d"), dica=$("dica");
+const G={nos:new Map(), arestas:[], sim:[], simArestas:[], energia:0, folhas:[], cores:{}, memoria:new Set(), agora:Date.now(), vista:{x:0,y:0,k:1}, mouse:null, assin:"", camadas:[]};
+function corGrupo(g){
+  if(CORES[g]) return CORES[g];
+  if(!G.cores[g]) G.cores[g]=PALETA[Object.keys(G.cores).length%PALETA.length];
+  return G.cores[g];
+}
+function atualizarGrafo(g, agora){
+  G.agora=agora;
+  const assin=g.nos.length+"|"+g.arestas.length+"|"+g.nos.reduce((m,n)=>Math.max(m,n.mod||0),0);
+  if(assin===G.assin) return; G.assin=assin;
+  G.camadas=g.camadas||[];
+  const antigos=G.nos; G.nos=new Map();
+  g.nos.filter(n=>n.tipo==="pasta").forEach(n=>corGrupo(n.grupo));
+  const grau={}; g.arestas.forEach(([a,b])=>{grau[a]=(grau[a]||0)+1;grau[b]=(grau[b]||0)+1});
+  const pai={}; g.arestas.forEach(([a,b])=>{ if(!(b in pai)) pai[b]=a });
+  g.nos.forEach((n,i)=>{
+    const v=antigos.get(n.id), ang=i*2.39996, r=40+9*Math.sqrt(i);
+    const no=Object.assign({x:v?v.x:Math.cos(ang)*r, y:v?v.y:Math.sin(ang)*r, vx:0, vy:0}, n);
+    no.folha = n.tipo==="nota" && (grau[n.id]||0)<=1; no.pai=pai[n.id];
+    no.raio = n.raio|| (n.tipo==="centro"?13 : n.tipo==="pasta"?8.5 : n.tipo==="agente"?10 : no.folha?3.2:4.4);
+    no.cor = n.tipo==="centro"?CORES.vault : corGrupo(n.grupo);
+    G.nos.set(n.id,no);
+  });
+  G.arestas=g.arestas.map(([a,b])=>[G.nos.get(a),G.nos.get(b)]).filter(e=>e[0]&&e[1]);
+  G.sim=[];
+  const filhos={}; G.folhas=[...G.nos.values()].filter(n=>n.folha);
+  G.folhas.forEach(n=>{const p=n.pai||"vault";(filhos[p]=filhos[p]||[]).push(n)});
+  Object.values(filhos).forEach(l=>l.forEach((n,i)=>{n.ordem=i;n.irmaos=l.length}));
+  G.simArestas=[];
+  G.energia=1;
+  $("legenda").innerHTML = g.nos.filter(n=>n.tipo==="pasta").map(n=>`<span><i style="background:${corGrupo(n.grupo)}"></i>${esc(n.rotulo)}</span>`).join("")
+    + ["codex","claude","chatgpt"].map(k=>`<span><i style="background:${CORES[k]};border-radius:2px"></i>${{codex:"Codex",claude:"Claude Code",chatgpt:"ChatGPT"}[k]}</span>`).join("");
+  const met=g.metricas||{};
+  $("t-rede").textContent = `${g.nos.length} pontos · ${met.ligacoes??g.arestas.length} conexões · ${(g.camadas||[]).length} camadas`;
+}
+function passo(){
+  const s=G.sim, e=G.energia; if(e<0.02) return; G.energia*=0.992;
+  const rep=(a,b,m)=>{let dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy+0.01;
+    const peso=(a.tipo==="nota"&&b.tipo==="nota")?2600:6500, f=peso/d2*e*m, d=Math.sqrt(d2); dx/=d; dy/=d;
+    a.vx+=dx*f; a.vy+=dy*f; b.vx-=dx*f; b.vy-=dy*f;};
+  if(s.length<=350){
+    for(let i=0;i<s.length;i++){const a=s[i]; for(let j=i+1;j<s.length;j++) rep(a,s[j],1);}
+  } else { /* muitos nós: repulsão por amostragem para não pesar */
+    const K=36, m=s.length/K/2;
+    for(let i=0;i<s.length;i++){const a=s[i]; for(let q=0;q<K;q++){const b=s[(Math.random()*s.length)|0]; if(b!==a) rep(a,b,m);}}
+  }
+  for(const a of s){a.vx-=a.x*0.004*e; a.vy-=a.y*0.004*e;}
+  G.simArestas.forEach(([a,b])=>{let dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1;
+    const alvo=(a.tipo==="centro"||b.tipo==="centro")?150:(a.tipo==="agente"||b.tipo==="agente")?130:70, f=(d-alvo)*0.02*e; dx/=d; dy/=d;
+    a.vx+=dx*f; a.vy+=dy*f; b.vx-=dx*f; b.vy-=dy*f;});
+  const c=G.nos.get("vault");
+  s.forEach(n=>{ if(n===c){n.x=0;n.y=0;n.vx=n.vy=0;return} n.vx*=0.82; n.vy*=0.82; n.x+=Math.max(-12,Math.min(12,n.vx)); n.y+=Math.max(-12,Math.min(12,n.vy)); });
+}
+function posFolhas(){
+  G.folhas.forEach(n=>{if(n.x!==undefined&&n.y!==undefined) return; const p=G.nos.get(n.pai)||G.nos.get("vault"); if(!p) return;
+    const esp=n.irmaos>400?3.1:n.irmaos>120?4.2:5.6, r=p.raio+9+esp*Math.sqrt(n.ordem+0.5), ang=n.ordem*2.39996+hash(p.id)%7;
+    n.x=p.x+Math.cos(ang)*r; n.y=p.y+Math.sin(ang)*r;});
+}
+function desenhar(t){
+  const dpr=window.devicePixelRatio||1, w=tela.clientWidth, h=tela.clientHeight;
+  if(tela.width!==Math.round(w*dpr)||tela.height!==Math.round(h*dpr)){tela.width=Math.round(w*dpr);tela.height=Math.round(h*dpr)}
+  /* Coordenadas calculadas no servidor Python; o Canvas mantém interação e pulsos. */
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; G.nos.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x);y1=Math.max(y1,n.y)});
+  if(x0>x1){x0=y0=-1;x1=y1=1}
+  const margem=w<640?24:210, k=Math.min(2.2,(w-margem)/Math.max(60,x1-x0),(h-90)/Math.max(60,y1-y0)), v=G.vista;
+  v.k+=(k-v.k)*0.08; v.x+=(((x0+x1)/2)-v.x)*0.08; v.y+=(((y0+y1)/2)-v.y)*0.08;
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  const X=n=>(n.x-v.x)*v.k+w/2, Y=n=>(n.y-v.y)*v.k+h/2;
+  ctx.lineWidth=1;
+  G.arestas.forEach(([a,b])=>{
+    const ag=a.tipo==="agente"||b.tipo==="agente", viva=ag&&(G.memoria.has(a.grupo)||G.memoria.has(b.grupo));
+    ctx.strokeStyle = viva?"#6cb6ffcc" : ag?"#8fa0c833" : (a.folha||b.folha)?"#8fa0c81f":"#8fa0c84d";
+    ctx.setLineDash(ag&&!viva?[3,5]:[]); ctx.beginPath(); ctx.moveTo(X(a),Y(a)); ctx.lineTo(X(b),Y(b)); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  /* sinapses: pontinhos correndo pelas ligações */
+  const lig=G.arestas; if(lig.length){
+    const qtd=Math.min(14,Math.max(4,lig.length>>2));
+    for(let i=0;i<qtd;i++){const e=lig[(hash("s"+i)+Math.floor(t/2600+i*0.37))%lig.length], f=((t/2600+i*0.37)%1), a=e[0], b=e[1];
+      ctx.fillStyle="#cfe3ffb0"; ctx.beginPath(); ctx.arc(X(a)+(X(b)-X(a))*f, Y(a)+(Y(b)-Y(a))*f, 1.5, 0, 6.3); ctx.fill();}
+    lig.forEach(([a,b])=>{ const ag=a.tipo==="agente"?a:b.tipo==="agente"?b:null; if(!ag||!G.memoria.has(ag.grupo)) return;
+      const o=ag===a?b:a; for(let i=0;i<3;i++){const f=((t/900+i/3)%1); ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(X(ag)+(X(o)-X(ag))*f, Y(ag)+(Y(o)-Y(ag))*f, 2.4, 0, 6.3); ctx.fill();}});
+  }
+  let perto=null, dist=18; let recentes=0; G.nos.forEach(n=>{if(n.mod&&G.agora-n.mod<15*60*1000) recentes++});
+  G.nos.forEach(n=>{
+    const x=X(n), y=Y(n), r=Math.max(2,n.raio*Math.min(1.25,Math.max(.7,v.k)));
+    const novo = recentes<=8 && n.mod && G.agora-n.mod<15*60*1000;
+    if(novo || (n.tipo==="agente"&&G.memoria.has(n.grupo))){const f=(t/1400)%1; ctx.strokeStyle=n.cor; ctx.globalAlpha=1-f; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,r+3+f*14,0,6.3); ctx.stroke(); ctx.globalAlpha=1;}
+    if(n.tipo!=="nota"){ctx.fillStyle=n.cor+"33"; ctx.beginPath(); ctx.arc(x,y,r+5,0,6.3); ctx.fill();}
+    ctx.fillStyle=n.cor; ctx.beginPath();
+    if(n.tipo==="agente"){const q=r*0.9; ctx.roundRect(x-q,y-q,q*2,q*2,3)} else ctx.arc(x,y,r,0,6.3);
+    ctx.fill();
+    if(G.mouse){const d=Math.hypot(G.mouse.x-x,G.mouse.y-y); if(d<Math.max(dist,r+4)&&d<dist+r){dist=d;perto=n;perto._x=x;perto._y=y}}
+  });
+  ctx.textAlign="center"; ctx.textBaseline="top";
+  const poucas=G.nos.size<26;
+  G.nos.forEach(n=>{ if(n.tipo==="nota"&&!poucas) return;
+    ctx.font=(n.tipo==="nota"?"11px":"600 12px")+' "Segoe UI",system-ui,sans-serif'; ctx.fillStyle=n.tipo==="nota"?"#aab6d3":"#e7ecf7";
+    const rot=n.rotulo.length>26?n.rotulo.slice(0,25)+"…":n.rotulo; ctx.fillText(rot, X(n), Y(n)+n.raio*Math.max(.7,Math.min(1.25,v.k))+5);});
+  ctx.textAlign="center"; ctx.textBaseline="top"; ctx.font='600 9px "Segoe UI",system-ui,sans-serif'; ctx.fillStyle="#7483a0";
+  G.camadas.forEach(c=>ctx.fillText(c.rotulo,X({x:c.x,y:0}),8));
+  if(perto){dica.style.display="block"; dica.style.left=Math.min(w-180,perto._x+12)+"px"; dica.style.top=(perto._y+tela.offsetTop-34)+"px";
+    dica.innerHTML=esc(perto.rotulo)+`<small>${perto.tipo==="nota"?esc(perto.grupo)+(perto.mod?" · "+ha(perto.mod,G.agora):""):perto.tipo==="pasta"?"pasta":perto.tipo==="agente"?"agente":"vault"}</small>`;
+  } else dica.style.display="none";
+  requestAnimationFrame(desenhar);
+}
+tela.addEventListener("mousemove",e=>{const r=tela.getBoundingClientRect();G.mouse={x:e.clientX-r.left,y:e.clientY-r.top}});
+tela.addEventListener("mouseleave",()=>{G.mouse=null});
+window.addEventListener("resize",()=>{G.energia=Math.max(G.energia||0,.3)});
+
+/* ------------------------------------------------------------------ ciclo */
+let falhas=0;
+async function ciclo(){
+  try{
+    const r=await fetch("/api/estado",{cache:"no-store"}); const d=await r.json(); if(d.erro) throw new Error(d.erro);
+    falhas=0; $("aviso").style.display="none";
+    $("nome-vault").textContent="· vault “"+d.vault+"”";
+    $("p-mcp").className="ponto "+(d.mcp.ativo?"on":"off");
+    $("t-mcp").textContent=d.mcp.ativo?"online · porta "+d.mcp.porta:"offline (abra o Obsidian)";
+    $("t-notas").textContent=d.grafo.total_notas;
+    sala("codex",d.codex,d.agora); sala("claude",d.claude,d.agora); salaChatGPT(d.chatgpt,d.agora); feed(d.feed);
+    G.memoria=new Set([...d.codex.sessoes,...d.claude.sessoes].filter(s=>s.memoria).map(s=>s.tipo));
+    $("rede").classList.toggle("acesa",G.memoria.size>0);
+    atualizarGrafo(d.grafo,d.agora);
+  }catch(e){ if(++falhas>=2) $("aviso").style.display="block"; }
+  setTimeout(ciclo,2500);
+}
+ciclo(); requestAnimationFrame(desenhar);
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Só na versão de depuração: galeria dos personagens em todos os estados (abre por adb, sem login). -->
+        <activity android:name=".GaleriaPersonagens" android:exported="true" android:label="Galeria de personagens" />
+    </application>
+</manifest>

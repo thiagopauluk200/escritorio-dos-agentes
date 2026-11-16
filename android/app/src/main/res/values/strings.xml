@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Central dos Agentes</string>
+    <string name="canal_tarefas">Tarefas concluídas ou com falha</string>
+    <string name="canal_alertas">Alertas de tokens e degradação</string>
+</resources>
