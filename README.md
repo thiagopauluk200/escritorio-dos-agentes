@@ -15,9 +15,10 @@
 
 ## Rede Neural no computador e no celular
 
-<p>
-  <a href="docs/imagens/rede-neural-web.png"><img src="docs/imagens/rede-neural-web.png" alt="Painel web da Rede Neural com o grafo 3D e as atividades de Claude e Codex" width="76%"></a>
-  <a href="docs/imagens/rede-neural-android.jpg"><img src="docs/imagens/rede-neural-android.jpg" alt="Tela inicial da Rede Neural no Android com o grafo do vault Obsidian" width="19%"></a>
+<p align="center">
+  <a href="docs/imagens/rede-neural-web.png"><img src="docs/imagens/rede-neural-web.png" alt="Painel web da Rede Neural com o grafo 3D e as atividades de Claude e Codex" width="72%"></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="docs/imagens/rede-neural-android.jpg"><img src="docs/imagens/rede-neural-android.jpg" alt="Tela inicial da Rede Neural no Android com o grafo do vault Obsidian" width="20%"></a>
 </p>
 
 [Instalar e conectar](#instalar-e-conectar) · [Obsidian e MCP](#integrar-o-obsidian-e-o-mcp) · [Rodar em Python](#rodar-a-partir-do-código-em-python) · [Resolver problemas](#resolver-problemas)
@@ -75,84 +76,6 @@ No PowerShell 7, leia a chave em uma variável de ambiente da sessão e registre
 ```powershell
 $env:OBSIDIAN_API_KEY = Read-Host -MaskInput "Chave de API do plugin Obsidian"
 
-codex mcp add obsidian --url http://127.0.0.1:27123/mcp/ --bearer-token-env-var OBSIDIAN_API_KEY
+codex mcp add obsidian --url [http://127.0.0.1:27123/mcp/](http://127.0.0.1:27123/mcp/) --bearer-token-env-var OBSIDIAN_API_KEY
 
-claude mcp add --transport http --scope user obsidian http://127.0.0.1:27123/mcp/ --header 'Authorization: Bearer ${OBSIDIAN_API_KEY}'
-```
-
-Inicie os clientes a partir do mesmo terminal enquanto a variável estiver disponível. Em um novo terminal, carregue a chave novamente antes de iniciar o agente. Se um servidor chamado `obsidian` já estiver configurado, confira a entrada existente antes de adicionar outra.
-
-**Teste:** execute `codex mcp list` ou `claude mcp list`, peça ao agente para listar as notas do vault e abra **Agentes → Fluxo de memória** na Rede Neural. O painel observa os registros locais do Claude Code e do Codex. Atividade que só existe na nuvem fica fora dessa leitura.
-
-[Configuração MCP do Codex](https://developers.openai.com/codex/mcp) · [Configuração MCP do Claude Code](https://code.claude.com/docs/en/mcp) · [Endereços e certificado do plugin](https://github.com/coddingtonbear/obsidian-local-rest-api#mcp-clients)
-
-## Rodar a partir do código em Python
-
-Use Python 3.11 ou superior. Para a janela gráfica, instale também o suporte a Tk da sua distribuição Python. No Linux, ele pode vir em um pacote separado, como `python3-tk`.
-
-```bash
-git clone https://github.com/thiagopauluk200/escritorio-dos-agentes.git
-cd escritorio-dos-agentes
-python -m venv .venv
-```
-
-Ative o ambiente virtual:
-
-- Windows PowerShell: `.\.venv\Scripts\Activate.ps1` a partir da pasta do repositório.
-- macOS ou Linux: `source .venv/bin/activate`.
-
-Instale as dependências e abra a janela do Conector:
-
-```bash
-python -m pip install -r rede/requirements.txt
-python rede/conector.py
-```
-
-Para rodar pelo terminal, informe o caminho do seu vault e use `--lan` para ativar a conexão Android. O inicializador exibe o código de pareamento e o caminho da chave web:
-
-```bash
-python rede/servidor.py --vault "/caminho/do/vault" --porta 8772 --lan --abrir
-```
-
-Use `python3` nos sistemas em que esse é o nome do comando. Para conferir os testes do pareamento e da autenticação local:
-
-```bash
-python -m unittest discover -s tests -p test_rede_acesso.py -v
-```
-
-## Resolver problemas
-
-| O que aparece | O que fazer |
-| --- | --- |
-| **Página recusou a conexão** | Abra o Conector, clique em **Iniciar conexão** e use **Abrir painel web** para ir ao endereço atual. |
-| **Chave web incorreta** | Use **Copiar chave web** no Conector que está rodando e cole a chave no painel do PC. |
-| **QR ilegível** | Enquadre o quadrado inteiro, aproxime o celular e confirme a foto. Você também pode usar **Usar código manual**. |
-| **Android não encontra o PC** | Confira se os dois estão na mesma rede local e se o Firewall permite o Conector em redes privadas. Redes de convidados podem separar os aparelhos. |
-| **O IP do PC mudou** | Reinicie a conexão no Conector e pareie com o novo QR. Se necessário, indique o IPv4 do Wi-Fi ou Ethernet na janela do Conector. |
-| **O grafo mostra leitura pelo disco** | Selecione a raiz do vault, deixe esse vault aberto no Obsidian e confira se o plugin está ativo ali. |
-| **O agente aparece sem sessões** | Abra e use o cliente oficial no PC que roda o Conector. Confira o MCP com os comandos de listagem acima. |
-
-## Como funciona
-
-```mermaid
-flowchart LR
-  A["Android"] -->|HTTPS na rede local| C["Conector no computador"]
-  B["Navegador no PC"] -->|127.0.0.1| C
-  C --> O["Vault e índice do Obsidian"]
-  C --> L["Registros locais de Claude Code e Codex"]
-```
-
-O Conector lê o vault e os registros de atividade. O gráfico permite girar, aproximar, buscar notas e mostrar ou ocultar legendas, pastas e tags. O painel de tráfego mede o serviço local e as cargas MCP identificadas nos registros.
-
-A conta Android e os dados de sessão ficam na instalação local. O pareamento vincula o app ao certificado do Conector. O navegador usa uma chave própria. Guarde senhas, chaves, QR de cadastro e arquivos do vault fora de commits e capturas públicas.
-
-## Código e distribuição
-
-| Pasta | Conteúdo |
-| --- | --- |
-| `android/` | App em Kotlin, telas de acesso e integração com o painel. |
-| `rede/` | Conector Python, autenticação, pareamento e interface compartilhada. |
-| `tests/` | Testes do acesso e dos serviços locais. |
-| `celular/`, `ponte.py` | Central de tarefas e ponte do Escritório dos Agentes. |
-
-[Detalhes do Conector e recuperação da conta local](rede/README.md) · [Compilar, assinar e publicar uma versão](rede/PUBLICAR.md)
+claude mcp add --transport http --scope user obsidian [http://127.0.0.1:27123/mcp/](http://127.0.0.1:27123/mcp/) --header 'Authorization: Bearer ${OBSIDIAN_API_KEY}'
