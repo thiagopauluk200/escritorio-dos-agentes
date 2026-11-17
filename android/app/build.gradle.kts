@@ -19,8 +19,8 @@ android {
         // minSdk 26 (Android 8.0): cobre o S22 Ultra com folga e permite testar em aparelhos antigos.
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "3.1.1"
+        versionCode = 6
+        versionName = "3.1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

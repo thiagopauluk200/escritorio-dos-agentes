@@ -1,14 +1,17 @@
 # Publicar a Rede Neural no GitHub
 
-## Arquivos da versão 3.1.1
+## Arquivos da release
 
 Na pasta `android/dist`, use:
 
 | Arquivo | Uso |
 |---|---|
-| `RedeNeural-3.1.1.apk` | Aplicativo Android assinado para instalação. |
-| `Conector-Rede-Neural-3.1.1-Windows.zip` | Conector portátil para Windows x64, com Python oficial e dependências incluídas. |
-| `RedeNeural-3.1.1-SHA256SUMS.txt` | Hashes dos dois downloads. |
+| `RedeNeural-Android.apk` | Cópia do APK assinado da versão. |
+| `Conector-Rede-Neural-Windows.zip` | Conector portátil para Windows x64, com Python e dependências incluídas. |
+| `Rede-Neural-Kit.zip` | APK, Conector Windows e arquivo de hashes reunidos em um ZIP. |
+| `SHA256SUMS.txt` | Hashes do APK e dos dois ZIPs. |
+
+Os links no README usam `releases/latest/download/`. Preserve os nomes da tabela a cada versão. Dentro do kit, inclua os hashes do APK e do Conector. No arquivo de hashes anexado à release, inclua também o hash do kit.
 
 O Android usa o pacote `br.escritorio.central`. A versão de depuração usa outro identificador. No Windows, extraia o ZIP antes de abrir `Abrir-Conector.bat`.
 
@@ -33,8 +36,8 @@ Chaves de assinatura, chaves do Obsidian, QR de pareamento, vaults e logs ficam 
 ## 3. Crie a release
 
 1. Abra o [repositório no GitHub](https://github.com/thiagopauluk200/escritorio-dos-agentes). Para downloads públicos, use um repositório público.
-2. Entre em **Releases → Draft a new release**. Crie a tag `v3.1.1` no commit da versão. Use o título **Rede Neural 3.1.1**.
-3. Em **Assets**, anexe os três arquivos da tabela. Cole a descrição abaixo e publique.
+2. Entre em **Releases → Draft a new release**. Crie a tag da versão no commit correspondente, como `v3.1.2`. Use o título **Rede Neural** seguido da versão.
+3. Em **Assets**, anexe os quatro arquivos da tabela. Use a descrição abaixo como base e marque **Set as the latest release** ao publicar.
 4. Abra a página da release em janela anônima. Confira que os downloads aparecem e que os hashes conferem com o arquivo SHA-256.
 
 [Documentação de releases do GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
@@ -47,7 +50,7 @@ Chaves de assinatura, chaves do Obsidian, QR de pareamento, vaults e logs ficam 
 >
 > Abra o Conector no Windows e escolha o vault. Instale o APK no Android, conecte os dois aparelhos à mesma rede e leia o QR exibido pelo Conector. Crie a conta local no primeiro acesso.
 >
-> [Guia de instalação e integração](https://github.com/thiagopauluk200/escritorio-dos-agentes/blob/v3.1.1/rede/README.md)
+> [Guia de instalação e integração](https://github.com/thiagopauluk200/escritorio-dos-agentes#instalar-e-conectar)
 
 ## Repetir a compilação
 
