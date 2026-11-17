@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#090e18">
+  <meta name="description" content="Visualize as notas, os links e a atividade dos agentes no vault compartilhado do Obsidian.">
+  <title>Rede Neural · Memória compartilhada</title>
+  <link rel="stylesheet" href="/estilo.css">
+  <script src="/motor3d.js" defer></script>
+  <script src="/personagens.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#grafo">Ir para o grafo</a>
+  <header class="topo">
+    <div class="marca"><span class="simbolo" aria-hidden="true"><i></i><i></i><i></i></span><div>
+      <h1>Rede Neural</h1><p>Memória compartilhada</p>
+    </div></div>
+    <div id="conexao" class="conexao" role="status">Conectando</div>
+  </header>
+  <nav class="navegacao vidro" aria-label="Navegação principal" id="navegacao">
+    <button type="button" data-painel="grafo" aria-pressed="true" aria-controls="grafo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 6 10 2m-9 0 3 8m5-6-3 6"/><circle cx="5" cy="6" r="2.3"/><circle cx="19" cy="8" r="2.3"/><circle cx="12" cy="19" r="2.3"/></svg>
+      <span>Grafo</span>
+    </button>
+    <button type="button" data-painel="atividade" aria-pressed="false" aria-controls="atividade">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 19v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 5a3 3 0 0 1 0 6m3 8v-2a4 4 0 0 0-2-3.5"/></svg>
+      <span>Agentes</span>
+    </button>
+    <button type="button" data-painel="trafego" aria-pressed="false" aria-controls="trafego">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 15v-4m6 4V5m6 10V8"/></svg>
+      <span>Tráfego</span>
+    </button>
+    <button type="button" data-painel="ajustes" aria-pressed="false" aria-controls="ajustes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v8m0 4v4m7-16v3m0 4v9m7-16v10m0 4v2"/><circle cx="5" cy="14" r="2"/><circle cx="12" cy="9" r="2"/><circle cx="19" cy="16" r="2"/></svg>
+      <span>Ajustes</span>
+    </button>
+  </nav>
+
+  <main id="espaco" data-visao="grafo">
+    <section class="mapa" aria-labelledby="titulo-mapa" id="grafo" tabindex="-1">
+      <canvas id="canvas" aria-label="Projeção 3D. Use a busca para selecionar notas pelo teclado."></canvas>
+      <div class="mapa-topo">
+        <div><p class="sobrelinha">OBSIDIAN</p><h2 id="titulo-mapa">Grafo do vault</h2><p id="metricas" class="suave">Aguardando conexão</p></div>
+        <button class="quadrado vidro" id="enquadrar" title="Enquadrar grafo" aria-label="Enquadrar grafo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/><circle cx="12" cy="12" r="2"/></svg>
+        </button>
+      </div>
+      <div class="busca">
+        <div class="campo-busca vidro">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4 4"/></svg>
+          <input type="search" id="busca" placeholder="Buscar nota…" aria-label="Buscar nota" autocomplete="off" maxlength="120">
+        </div>
+        <ul id="resultados" hidden aria-label="Resultados da busca"></ul>
+      </div>
+      <div class="zoom vidro" role="group" aria-label="Zoom">
+        <button id="mais" class="quadrado" aria-label="Aproximar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+        <button id="menos" class="quadrado" aria-label="Afastar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+      </div>
+      <p class="gestos">Arraste para girar · Pinça ou rolagem para zoom</p>
+    </section>
+
+    <aside class="lateral" aria-label="Detalhes do vault">
+      <section id="atividade" class="painel">
+        <p class="sobrelinha">SESSÕES LOCAIS</p><h2>Agentes</h2>
+        <div class="elenco">
+          <article class="agente claude"><div id="claude-avatar" class="avatar"></div><div>
+            <h3>Claude</h3><p id="claude-estado" class="estado">Sem dados</p><p id="claude-fala" class="suave"></p>
+          </div></article>
+          <article class="agente codex"><div id="codex-avatar" class="avatar"></div><div>
+            <h3>Codex</h3><p id="codex-estado" class="estado">Sem dados</p><p id="codex-fala" class="suave"></p>
+          </div></article>
+        </div>
+        <p class="suave fonte">Estados inferidos dos registros do Claude Code e do Codex neste PC.</p>
+        <h2 class="secundario">Fluxo de memória</h2>
+        <ul id="eventos" class="linhas"><li class="suave">Aguardando eventos do Obsidian.</li></ul>
+      </section>
+
+      <section id="trafego" class="painel" hidden>
+        <p class="sobrelinha">VOLUME DE DADOS</p><h2>Tráfego</h2>
+        <h3>MCP · últimas 24 h</h3>
+        <p class="suave fonte">Carga registrada nos logs locais. Retornos agrupados ficam fora da medição.</p>
+        <dl id="mcp" class="dados"></dl>
+        <div id="histograma" class="histograma" aria-label="Volume MCP em intervalos de 15 minutos"></div>
+        <h3>Servidor local · desde o início</h3>
+        <p class="suave fonte">Corpos HTTP recebidos e enviados, sem cabeçalhos.</p>
+        <dl id="http" class="dados"></dl>
+      </section>
+
+      <section id="ajustes" class="painel" hidden>
+        <p class="sobrelinha">VISUALIZAÇÃO</p><h2>Ajustes</h2>
+        <div class="ajustes">
+          <label>Rotação automática <input type="checkbox" data-op="autoGirar"></label>
+          <label>Animações e partículas <input id="movimento" type="checkbox" data-op="movimento"></label>
+          <label>Percursos entre notas <input type="checkbox" data-op="trilhas"></label>
+          <label>Legendas do grafo <select data-op="rotulos"><option value="nunca">Sem legendas</option><option value="auto">Automáticas</option><option value="sempre">Com legendas</option></select></label>
+          <label>Exibir pastas <input type="checkbox" data-op="pastas"></label>
+          <label>Exibir notas <input type="checkbox" data-op="notas"></label>
+          <label>Tags <input type="checkbox" data-op="tags"></label>
+          <label>Links sem destino <input type="checkbox" data-op="fantasmas"></label>
+          <label>Qualidade <select data-op="qualidade"><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></label>
+        </div>
+        <p id="fonte-grafo" class="suave"></p>
+        <button id="conta-android" type="button" hidden>Conta e computador</button>
+        <button id="sair" type="button">Encerrar sessão</button>
+      </section>
+
+      <section id="detalhe" class="painel" hidden>
+        <button id="voltar" type="button">‹ Voltar</button>
+        <p class="sobrelinha" id="nota-tipo">NOTA</p><h2 id="nota-titulo"></h2>
+        <p class="suave" id="nota-meta"></p>
+        <div id="nota-links"></div>
+        <pre id="nota-texto"></pre>
+      </section>
+    </aside>
+  </main>
+  <div id="aviso" role="status" hidden></div>
+
+  <dialog id="entrada" aria-labelledby="titulo-entrada">
+    <form id="login">
+      <p class="sobrelinha">MEMÓRIA COMPARTILHADA</p>
+      <h2 id="titulo-entrada">Entrar na Rede Neural</h2>
+      <p>No Conector Rede Neural, clique em <strong>Copiar chave web</strong> e cole a chave abaixo.</p>
+      <label for="chave">Chave de acesso</label>
+      <input id="chave" type="password" required autocomplete="current-password" maxlength="256">
+      <p id="erro-login" role="alert"></p>
+      <button type="submit">Conectar</button>
+    </form>
+  </dialog>
+</body>
+</html>

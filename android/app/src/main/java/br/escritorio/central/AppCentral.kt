@@ -12,7 +12,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -42,7 +41,7 @@ class Container(ctx: Context) {
     init { repo = Repositorio(api, db, prefs, cofre) }
 }
 
-class AppCentral : Application(), Configuration.Provider {
+class AppCentral : Application() {
     lateinit var c: Container
         private set
     val escopo = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -53,8 +52,6 @@ class AppCentral : Application(), Configuration.Provider {
         escopo.launch { c.repo.iniciar() }  // lê token (Keystore) e cache (Room) fora da thread principal
         criarCanais()
     }
-
-    override val workManagerConfiguration: Configuration get() = Configuration.Builder().build()
 
     private fun criarCanais() {
         val nm = getSystemService(NotificationManager::class.java)

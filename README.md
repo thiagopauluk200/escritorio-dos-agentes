@@ -1,30 +1,29 @@
 # Escritório dos Agentes
 
-Um ambiente pessoal para acompanhar e coordenar agentes de inteligência artificial. O projeto reúne um painel web local, uma central de tarefas, uma ponte para execução no computador e um aplicativo Android.
+O painel web local e o aplicativo Android são a **Rede Neural**, o visualizador 3D do vault compartilhado do Obsidian. A versão de distribuição usa uma conta local e pareamento por QR na rede privada. Veja [como instalar e conectar](rede/README.md) e [como publicar uma versão no GitHub](rede/PUBLICAR.md).
 
-## O que o projeto faz
+## Serviços e ferramentas
 
-- **Painel local:** apresenta as sessões ativas do Codex e do Claude Code e visualiza a rede de conhecimento do Obsidian.
+- **Rede Neural:** mostra o grafo de notas, as chamadas MCP dos agentes e o volume de tráfego observado.
 - **Central de tarefas:** organiza agentes, tarefas e notas em uma interface web adaptada para uso no celular.
 - **Ponte com o computador:** conecta a Central aos agentes locais, executa tarefas escolhidas e devolve resultados e estados.
-- **Aplicativo Android:** acompanha agentes, tarefas, métricas e conhecimento, com cache local e armazenamento protegido para credenciais.
 - **Importação de conversas:** transforma um arquivo de exportação do ChatGPT em notas Markdown.
 - **Proteções operacionais:** restringe a ponte a pastas configuradas localmente, evita execuções concorrentes e trata operações repetidas de forma idempotente.
 
-## Arquitetura
+## Arquitetura da Rede Neural
 
 ```text
-Aplicativo Android ──HTTPS──┐
-                            ├── Central web ── Ponte local ── Codex / Claude Code
-Navegador ─────────────────┘                   └──────────── Obsidian
+Android ─── HTTPS privado ──┐                  ┌── Índice do Obsidian
+                            ├── Conector PC ───┤
+Navegador ─── loopback ──────┘                  └── Registros Claude Code e Codex
 ```
 
-O painel local lê registros de sessão e notas no próprio computador. A Central pode rodar em um dispositivo separado; a ponte faz a comunicação entre ela e os agentes instalados no computador. O projeto não inclui dados de usuários ou credenciais de demonstração.
+A Central de tarefas e a ponte têm entradas próprias. A Rede Neural consulta as notas e os registros locais em modo de leitura.
 
 ## Tecnologias
 
 - Python para os serviços locais, a Central e as ferramentas de integração.
-- Kotlin e Jetpack Compose para o aplicativo Android.
+- Kotlin para o aplicativo Android e o transporte HTTPS autenticado.
 - HTML, CSS e JavaScript para as interfaces web.
 - SQLite e Room para armazenamento local, com sincronização orientada a operações idempotentes.
 
@@ -32,7 +31,8 @@ O painel local lê registros de sessão e notas no próprio computador. A Centra
 
 | Caminho | Conteúdo |
 |---|---|
-| `server.py`, `index.html` | Painel web local e leitura das sessões e da rede de notas |
+| `rede/` | Servidor e interface da Rede Neural |
+| `server.py`, `index.html` | Painel local anterior |
 | `ponte.py` | Comunicação entre a Central e os agentes no computador |
 | `celular/` | Serviço da Central e sua interface web |
 | `android/` | Aplicativo Android nativo |
@@ -50,10 +50,10 @@ python -m pip install -r requirements.txt
 Inicie o painel apontando para um vault Obsidian existente:
 
 ```bash
-python server.py --vault "/caminho/para/seu/vault"
+python rede/servidor.py --abrir
 ```
 
-O painel fica disponível apenas no computador local, na porta padrão `8765`.
+O painel fica disponível em `http://127.0.0.1:8770/`. Use `--vault` para indicar outra pasta.
 
 Para compilar o aplicativo, abra `android/` no Android Studio com o JDK e o SDK Android instalados. A configuração local do SDK fica em `android/local.properties`, que não deve ser versionada.
 

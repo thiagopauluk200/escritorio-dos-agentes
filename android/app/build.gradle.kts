@@ -19,8 +19,8 @@ android {
         // minSdk 26 (Android 8.0): cobre o S22 Ultra com folga e permite testar em aparelhos antigos.
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 5
+        versionName = "3.1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -50,6 +50,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    sourceSets.getByName("main").assets.srcDir(rootProject.file("../rede/web"))
     buildFeatures {
         compose = true
         buildConfig = true
@@ -67,6 +68,7 @@ ksp {
 }
 
 dependencies {
+    implementation("com.google.zxing:core:3.5.4")
     val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
