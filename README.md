@@ -13,6 +13,13 @@
 | [SHA-256](https://github.com/thiagopauluk200/escritorio-dos-agentes/releases/latest/download/SHA256SUMS.txt) | Confira a integridade dos downloads. |
 | [Releases](https://github.com/thiagopauluk200/escritorio-dos-agentes/releases) | Veja as mudanças e baixe versões anteriores. |
 
+## Rede Neural no computador e no celular
+
+<p>
+  <a href="docs/imagens/rede-neural-web.png"><img src="docs/imagens/rede-neural-web.png" alt="Painel web da Rede Neural com o grafo 3D e as atividades de Claude e Codex" width="76%"></a>
+  <a href="docs/imagens/rede-neural-android.jpg"><img src="docs/imagens/rede-neural-android.jpg" alt="Tela inicial da Rede Neural no Android com o grafo do vault Obsidian" width="19%"></a>
+</p>
+
 [Instalar e conectar](#instalar-e-conectar) · [Obsidian e MCP](#integrar-o-obsidian-e-o-mcp) · [Rodar em Python](#rodar-a-partir-do-código-em-python) · [Resolver problemas](#resolver-problemas)
 
 ## Instalar e conectar
